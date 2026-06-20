@@ -15,7 +15,6 @@ import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
@@ -50,7 +49,6 @@ class ProductServiceIntegrationTest {
                 Product result = productService.save(input);
 
                 assertThat(result.getId()).isEqualTo(1L);
-                assertEquals(99999.0, product.getPrecio());
                 assertThat(result.getName()).isEqualTo("Auriculares Sony");
                 assertThat(result.getPrice()).isEqualTo(320.00);
                 assertThat(result.getStock()).isEqualTo(15);
