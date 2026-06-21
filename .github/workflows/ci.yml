@@ -4,39 +4,50 @@ on:
   push:
     branches:
       - main
+
   pull_request:
     branches:
       - main
 
 jobs:
-  build-and-test:
-    name: Build y Pruebas
+  build-test-sonar:
+    name: Build, Test, Coverage y SonarCloud
     runs-on: ubuntu-latest
 
     steps:
-      - name: 1 - Checkout del código fuente
+      - name: Checkout del código
         uses: actions/checkout@v4
 
-      - name: 2 - Configurar Java 17
+      - name: Configurar Java 17
         uses: actions/setup-java@v4
         with:
           java-version: '17'
           distribution: 'temurin'
           cache: maven
 
-      - name: 3 - Compilar el proyecto
-        run: mvn compile --no-transfer-progress
+      - name: Compilar y ejecutar pruebas
+        run: mvn clean verify
 
-      - name: 4 - Ejecutar pruebas unitarias
-        run: mvn test --no-transfer-progress
-
-      - name: 5 - Ejecutar pruebas de integración
-        run: mvn verify --no-transfer-progress
-
-      - name: 6 - Publicar reporte de pruebas
-        uses: actions/upload-artifact@v4
+      - name: Publicar reportes de pruebas
         if: always()
+        uses: actions/upload-artifact@v4
         with:
-          name: reporte-pruebas
+          name: reportes-pruebas
           path: target/surefire-reports/
-          retention-days: 7
+
+      - name: Publicar reporte JaCoCo
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: jacoco-report
+          path: target/site/jacoco/
+
+      - name: Analizar con SonarCloud
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+        run: >
+          mvn sonar:sonar
+          -Dsonar.projectKey=Djacobocolq_MiniShop
+          -Dsonar.organization=djacobocolq
+          -Dsonar.host.url=https://sonarcloud.io
+          -Dsonar.token=${SONAR_TOKEN}
